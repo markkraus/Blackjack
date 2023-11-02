@@ -1,153 +1,121 @@
-public class Blackjack  {
-    public static int dealerWins = 0;
-    public static int playerWins = 0;
-    public static int ties = 0;
+import java.util.Scanner;
 
-        public static void main(String[] args)  {
-            int rounds = Integer.parseInt(args[0]);
-            int shoes = Integer.parseInt(args[1]);
-            int trace = Integer.parseInt(args[2]);
-            BlackjackCards deck =  generateDeck(shoes);
+public class Blackjack {
 
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        boolean playAgain = true;
 
+        while (playAgain) {
+            RandIndexQueue<String> deck = new RandIndexQueue<>(52);
+            initializeDeck(deck);
 
-            System.out.println("Starting Blackjack with" + rounds + " and " + shoes + " decks in the shoe");
-            for(int i = 0; i < rounds; i++){
+            RandIndexQueue<String> playerHand = new RandIndexQueue<>(10);
+            RandIndexQueue<String> dealerHand = new RandIndexQueue<>(10);
 
-                System.out.println( " round " + i +" beginning");
-                Card[]  playerHand = new Card[20];
-                Card[]  dealerHand = new Card[20];
-                playerHand[0] = deck.dequeue();
-                dealerHand[0] = deck.dequeue();
-                playerHand[1] = deck.dequeue();
-                dealerHand[1] = deck.dequeue();
-                System.out.println("Player: Contents: " + playerHand[0].toString() + playerHand[1].toString() + ": " + (playerHand[0].value() + playerHand[1].value() ));
-                System.out.println("Dealer: Contents: " + dealerHand[0].toString() + dealerHand[1].toString() + ": " + (dealerHand[0].value() + dealerHand[1].value() ));
-                gamePlay(playerHand, dealerHand, deck);
-            }
+            dealInitialCards(deck, playerHand, dealerHand);
 
-        }
-
-        public static void gamePlay(Card[] playerHand, Card[] dealerHand, BlackjackCards deck){
-            int dealerValue = dealerHand[0].value() + dealerHand[1].value();
-            int playerValue = playerHand[0].value() + playerHand[1].value();
-            int counter = 2;
-            boolean flag = false;
-            while(playerValue < 17){
-                Card tempCard = deck.dequeue();
-                System.out.println(tempCard.toString());
-                playerHand[counter] = tempCard;
-                playerValue = playerValue + tempCard.value();
-                counter++;
-
-
-            }
-            if(playerValue > 21){
-                System.out.print("Player busts: Contents: ");
-                flag = true;
-                    for(int i = 0; i < playerHand.length; i++){
-                        System.out.print(playerHand[i].toString());
+            // Player's turn
+            while (true) {
+                System.out.println("Your hand: " + playerHand.toString());
+                System.out.println("Your score: " + calculateScore(playerHand));
+                if (isBust(calculateScore(playerHand))) {
+                    System.out.println("Bust! You lose.");
+                    playAgain = askToPlayAgain(scanner);
+                    break;
                 }
-                System.out.print(" : " + playerValue);
-
-            }
-            while(dealerValue < 17){
-
-                Card tempCard = deck.dequeue();
-                System.out.println(tempCard.toString());
-                dealerHand[counter] = tempCard;
-                dealerValue = dealerValue + tempCard.value();
-
-                counter++;
-
-            }
-            if(dealerValue > 21){
-                System.out.print("Dealer busts: Contents: ");
-                flag = true;
-                for(int i = 0; i < dealerHand.length; i++){
-                    System.out.print(dealerHand[i].toString());
-                }
-                System.out.print(" : " + dealerValue);
-
-            }
-            if(flag == false) {
-
-                if (dealerValue < playerValue) {
-                    System.out.println("Player Wins!");
-                    playerWins = playerWins + 1;
-                } else if (playerValue < dealerValue) {
-                    System.out.println("Dealer Wins!");
-                    dealerWins = dealerWins + 1;
+                System.out.println("Do you want to hit or stand? (Enter 'hit' or 'stand')");
+                String choice = scanner.nextLine();
+                if (choice.equals("hit")) {
+                    hit(deck, playerHand);
+                } else if (choice.equals("stand")) {
+                    break;
                 } else {
-                    System.out.println("Push");
-                    ties = ties + 1;
+                    System.out.println("Invalid choice. Please enter 'hit' or 'stand'.");
                 }
             }
-        }
 
+            if (playAgain) {
+                // Dealer's turn
+                while (calculateScore(dealerHand) < 17) {
+                    hit(deck, dealerHand);
+                }
 
-   public static BlackjackCards generateDeck(int shoes){
-            BlackjackCards deck = new BlackjackCards(52 * shoes);
-            for(int i = 0; i < shoes; i++) {
-                deck.enqueue(new Card(Card.Suits.Diamonds, Card.Ranks.Two));
-                deck.enqueue(new Card(Card.Suits.Hearts, Card.Ranks.Two));
-                deck.enqueue(new Card(Card.Suits.Clubs, Card.Ranks.Two));
-                deck.enqueue(new Card(Card.Suits.Spades, Card.Ranks.Two));
-                deck.enqueue(new Card(Card.Suits.Diamonds, Card.Ranks.Three));
-                deck.enqueue(new Card(Card.Suits.Hearts, Card.Ranks.Three));
-                deck.enqueue(new Card(Card.Suits.Clubs, Card.Ranks.Three));
-                deck.enqueue(new Card(Card.Suits.Spades, Card.Ranks.Three));
-                deck.enqueue(new Card(Card.Suits.Diamonds, Card.Ranks.Four));
-                deck.enqueue(new Card(Card.Suits.Hearts, Card.Ranks.Four));
-                deck.enqueue(new Card(Card.Suits.Clubs, Card.Ranks.Four));
-                deck.enqueue(new Card(Card.Suits.Spades, Card.Ranks.Four));
-                deck.enqueue(new Card(Card.Suits.Diamonds, Card.Ranks.Five));
-                deck.enqueue(new Card(Card.Suits.Hearts, Card.Ranks.Five));
-                deck.enqueue(new Card(Card.Suits.Clubs, Card.Ranks.Five));
-                deck.enqueue(new Card(Card.Suits.Spades, Card.Ranks.Five));
-                deck.enqueue(new Card(Card.Suits.Diamonds, Card.Ranks.Six));
-                deck.enqueue(new Card(Card.Suits.Hearts, Card.Ranks.Six));
-                deck.enqueue(new Card(Card.Suits.Clubs, Card.Ranks.Six));
-                deck.enqueue(new Card(Card.Suits.Spades, Card.Ranks.Six));
-                deck.enqueue(new Card(Card.Suits.Diamonds, Card.Ranks.Seven));
-                deck.enqueue(new Card(Card.Suits.Hearts, Card.Ranks.Seven));
-                deck.enqueue(new Card(Card.Suits.Clubs, Card.Ranks.Seven));
-                deck.enqueue(new Card(Card.Suits.Spades, Card.Ranks.Seven));
-                deck.enqueue(new Card(Card.Suits.Diamonds, Card.Ranks.Eight));
-                deck.enqueue(new Card(Card.Suits.Hearts, Card.Ranks.Eight));
-                deck.enqueue(new Card(Card.Suits.Clubs, Card.Ranks.Eight));
-                deck.enqueue(new Card(Card.Suits.Spades, Card.Ranks.Eight));
-                deck.enqueue(new Card(Card.Suits.Diamonds, Card.Ranks.Nine));
-                deck.enqueue(new Card(Card.Suits.Hearts, Card.Ranks.Nine));
-                deck.enqueue(new Card(Card.Suits.Clubs, Card.Ranks.Nine));
-                deck.enqueue(new Card(Card.Suits.Spades, Card.Ranks.Nine));
-                deck.enqueue(new Card(Card.Suits.Diamonds, Card.Ranks.Ten));
-                deck.enqueue(new Card(Card.Suits.Hearts, Card.Ranks.Ten));
-                deck.enqueue(new Card(Card.Suits.Clubs, Card.Ranks.Ten));
-                deck.enqueue(new Card(Card.Suits.Spades, Card.Ranks.Ten));
-                deck.enqueue(new Card(Card.Suits.Diamonds, Card.Ranks.Jack));
-                deck.enqueue(new Card(Card.Suits.Hearts, Card.Ranks.Jack));
-                deck.enqueue(new Card(Card.Suits.Clubs, Card.Ranks.Jack));
-                deck.enqueue(new Card(Card.Suits.Spades, Card.Ranks.Jack));
-                deck.enqueue(new Card(Card.Suits.Diamonds, Card.Ranks.Queen));
-                deck.enqueue(new Card(Card.Suits.Hearts, Card.Ranks.Queen));
-                deck.enqueue(new Card(Card.Suits.Clubs, Card.Ranks.Queen));
-                deck.enqueue(new Card(Card.Suits.Spades, Card.Ranks.Queen));
-                deck.enqueue(new Card(Card.Suits.Diamonds, Card.Ranks.King));
-                deck.enqueue(new Card(Card.Suits.Hearts, Card.Ranks.King));
-                deck.enqueue(new Card(Card.Suits.Clubs, Card.Ranks.King));
-                deck.enqueue(new Card(Card.Suits.Spades, Card.Ranks.King));
-                deck.enqueue(new Card(Card.Suits.Diamonds, Card.Ranks.Ace));
-                deck.enqueue(new Card(Card.Suits.Hearts, Card.Ranks.Ace));
-                deck.enqueue(new Card(Card.Suits.Clubs, Card.Ranks.Ace));
-                deck.enqueue(new Card(Card.Suits.Spades, Card.Ranks.Ace));
-                //
+                // Determine the winner
+                int playerScore = calculateScore(playerHand);
+                int dealerScore = calculateScore(dealerHand);
+                System.out.println("Player's hand: " + playerHand.toString());
+                System.out.println("Player's score: " + playerScore);
+                System.out.println("Dealer's hand: " + dealerHand.toString());
+                System.out.println("Dealer's score: " + dealerScore);
+
+                if (isBust(playerScore)) {
+                    System.out.println("Dealer wins!");
+                } else if (isBust(dealerScore)) {
+                    System.out.println("Player wins!");
+                } else if (playerScore == dealerScore) {
+                    System.out.println("It's a tie!");
+                } else if (playerScore > dealerScore) {
+                    System.out.println("Player wins!");
+                } else {
+                    System.out.println("Dealer wins!");
+                }
+                playAgain = askToPlayAgain(scanner);
             }
-            deck.shuffle();
-            return deck;
-   }
+        }
+    }
 
+    private static void initializeDeck(RandIndexQueue<String> deck) {
+        String[] suits = {"Hearts", "Diamonds", "Clubs", "Spades"};
+        String[] ranks = {"2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King", "Ace"};
 
+        for (String suit : suits) {
+            for (String rank : ranks) {
+                deck.enqueue(rank + " of " + suit);
+            }
+        }
+        deck.shuffle();
+    }
 
+    private static void dealInitialCards(RandIndexQueue<String> deck, RandIndexQueue<String> playerHand, RandIndexQueue<String> dealerHand) {
+        hit(deck, playerHand);
+        hit(deck, dealerHand);
+        hit(deck, playerHand);
+        hit(deck, dealerHand);
+    }
 
+    private static void hit(RandIndexQueue<String> deck, RandIndexQueue<String> hand) {
+        hand.enqueue(deck.dequeue());
+    }
+
+    private static int calculateScore(RandIndexQueue<String> hand) {
+        int score = 0;
+        int numAces = 0;
+        for (int i = 0; i < hand.size(); i++) {
+            String card = hand.get(i);
+            if (card.contains("Ace")) {
+                numAces++;
+                score += 11;
+            } else if (card.contains("King") || card.contains("Queen") || card.contains("Jack")) {
+                score += 10;
+            } else {
+                score += Integer.parseInt(card.split(" ")[0]);
+            }
+        }
+        while (score > 21 && numAces > 0) {
+            score -= 10;
+            numAces--;
+        }
+        return score;
+    }
+
+    private static boolean isBust(int score) {
+        return score > 21;
+    }
+
+    private static boolean askToPlayAgain(Scanner scanner) {
+        System.out.println("Do you want to play another round? (Enter 'yes' or 'no')");
+        String choice = scanner.nextLine().toLowerCase();
+        return choice.equals("yes");
+    }
 }
